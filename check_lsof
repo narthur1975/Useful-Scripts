@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# Nagios Exit Codes
+NagiosOK=0
+NagiosWarn=1
+NagiosCrit=2
+NagiosUnknown=3
+
+
+status=$(sudo /usr/sbin/lsof -i:54663 | grep "CLOSE_WAIT" | wc -l 2>&1)
+if [[ $status == 0 ]] ; then
+        RETURN=$NagiosOK
+        OUTPUT="No connections over port 54663 have CLOSE_WAIT status"
+    elif [[ $status -ge 1 && $status -le 30 ]] ; then
+        RETURN=$NagiosWarn
+        OUTPUT="${status} connections over port 54663 have CLOSE_WAIT status"
+    elif [[ $status -ge 31 ]] ; then
+        RETURN=$NagiosCrit
+        OUTPUT="${status} connections over port 54663 have CLOSE_WAIT status"
+    else
+        RETURN=$NagiosUnknown
+        OUTPUT="Unknown Error"
+    fi
+
+
+#plugin output and return code
+echo $OUTPUT
+exit $RETURN
+
+
+
